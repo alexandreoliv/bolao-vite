@@ -5,7 +5,6 @@ import { getDistancia } from "./getDistancia";
 
 export const getData = async (ano, serie) => {
 	const tabela = await getTabela(ano, serie);
-	console.log('tabela: ', tabela)
 
 	const { apostasColumns, apostasData, keys } = await getApostas(
 		ano,

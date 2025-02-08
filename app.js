@@ -35,12 +35,20 @@ app.post("/api/sendAposta", (req, res) => {
 		.catch((err) => console.log(err));
 });
 
-app.use(express.static(path.join(__dirname, "/frontend/build")));
 
-app.use((req, res) => {
-	// if no routes match, send them the React HTML
-	res.sendFile(__dirname + "/frontend/build/index.html");
-});
-// end of routes
+if (process.env.NODE_ENV === "production") {
+	app.use(express.static(path.join(__dirname, "/frontend/dist")));
+	
+	// Serve React app for all unmatched routes
+	app.use((req, res) => {
+		// if no routes match, send them the React HTML
+		res.sendFile(path.join(__dirname, "/frontend/dist/index.html"));
+	});
+} else {
+	// Return JSON 404 error for unmatched routes in development
+	app.use((req, res) => {
+		res.status(404).json({ error: "Route not found" });
+	});
+}
 
 module.exports = app;

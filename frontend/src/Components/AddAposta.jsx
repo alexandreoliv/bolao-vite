@@ -99,7 +99,7 @@ const AddAposta = (props) => {
 		const axios = require("axios");
 		serie === "A" ? setDisabledA(true) : setDisabledB(true);
 		return axios
-			.post(`${process.env.REACT_APP_API_URL}/sendAposta`, obj)
+			.post(`${import.meta.env.VITE_API_URL}/sendAposta`, obj)
 			.then((response) => {
 				console.log({ response });
 			})

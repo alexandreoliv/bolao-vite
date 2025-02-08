@@ -1,5 +1,4 @@
 import axios from 'axios';
-const API_KEY = process.env.REACT_APP_SECRET_KEY;
 
 export const getTabela = async (ano, serie) => {
 	// API method:
@@ -29,7 +28,7 @@ export const getTabela = async (ano, serie) => {
 
 	return await axios
 		.get(
-			`${process.env.REACT_APP_API_URL}/getTabelas?ano=${ano}&serie=${serie}`
+			`${import.meta.env.VITE_API_URL}/getTabelas?ano=${ano}&serie=${serie}`
 		)
 		.then((response) => response.data.tabelas[0])
 		.catch((error) => console.log(error));

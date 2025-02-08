@@ -2,17 +2,10 @@ const currentYear = 2023;
 
 export const getRanking = (dados) => {
 	const apostadores = getApostadores(dados);
-	console.log({ apostadores });
-
 	const historico = getHistorico(dados);
-	console.log({ historico });
-
 	const ranking = getFinalRanking(apostadores, historico);
-
 	const rankingData = getRankingData(ranking);
 	const rankingColumns = getRankingColumns(ranking);
-
-	console.log({ rankingData, rankingColumns });
 	return { rankingData, rankingColumns };
 };
 
@@ -76,7 +69,6 @@ const getFinalRanking = (apoiadores, historico) => {
 		mediaPosicaoProporcionalB: null,
 		mediaPosicaoProporcionalTotal: null,
 	}));
-	console.log({ apoiadoresData });
 
 	let historicoApostador = [];
 	for (let i = 0; i < apoiadores.length; i++) {
@@ -84,7 +76,6 @@ const getFinalRanking = (apoiadores, historico) => {
 			historico.filter((h) => h.nome === apoiadores[i])
 		);
 	}
-	console.log({ historicoApostador });
 
 	for (let i = 0; i < apoiadoresData.length; i++) {
 		apoiadoresData[i].titulosA = historicoApostador[i].filter(
@@ -201,7 +192,6 @@ const getFinalRanking = (apoiadores, historico) => {
 			apoiadoresData[i].campeonatosTotal
 		).toFixed(0);
 	}
-	console.log({ apoiadoresData });
 	return apoiadoresData;
 };
 

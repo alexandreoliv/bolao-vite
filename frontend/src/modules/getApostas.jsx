@@ -11,7 +11,7 @@ export const getApostas = async (serie, ano, tabela) => {
 const getFile = (ano, serie) => {
 	return axios
 		.get(
-			`${process.env.REACT_APP_API_URL}/getApostas?ano=${ano}&serie=${serie}`
+			`${import.meta.env.VITE_API_URL}/getApostas?ano=${ano}&serie=${serie}`
 		)
 		.then((response) => response.data.apostas)
 		.catch((error) => console.log(error));

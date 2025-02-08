@@ -27,8 +27,6 @@ export const App = () => {
 		}
 	});
 
-	console.log({ dados });
-
 	const getAllData = async () => {
 		let dados = [];
 		dados.push(await getData(2020, "A"));
@@ -42,8 +40,6 @@ export const App = () => {
 	};
 
 	const { rankingData, rankingColumns } = dados ? getRanking(dados) : {};
-
-	console.log("dados now", dados);
 
 	return (
 		<Layout className="layout">
