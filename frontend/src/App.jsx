@@ -60,7 +60,13 @@ export const App = () => {
 
 	return (
 		<Layout className="layout">
-			<Sider width={250} theme="light" className="site-layout-background">
+			<Sider
+				width={250}
+				theme="light"
+				className="site-layout-background"
+				breakpoint="md"  // Automatically collapses on smaller screens
+				collapsedWidth="0"
+			>
 				<MenuBolao setComponent={setComponent} />
 			</Sider>
 			<Layout>
