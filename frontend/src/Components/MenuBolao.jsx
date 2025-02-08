@@ -1,4 +1,5 @@
 import { Menu } from "antd";
+import { useState } from "react";
 
 const generateMenuItems = (startYear, endYear, setComponent) => {
   const menuItems = [];
@@ -62,10 +63,26 @@ const generateMenuItems = (startYear, endYear, setComponent) => {
   return menuItems;
 };
 
-const MenuBolao = ({ setComponent, startYear = 2020, endYear = 2025 }) => {
+const MenuBolao = ({ setComponent, startYear = 2020, endYear = 2024 }) => {
+  const [openKeys, setOpenKeys] = useState([`s${endYear}`]);
+
+  const handleOpenChange = (keys) => {
+    // Only keep the last clicked year key, closing the other years' submenus
+    setOpenKeys(keys.length === 1 ? keys : [keys[keys.length - 1]]);
+  };
+
   const menuItems = generateMenuItems(startYear, endYear, setComponent);
 
-  return <Menu theme="light" mode="inline" defaultSelectedKeys={[`s${endYear}`]} items={menuItems} />;
+  return (
+    <Menu
+      theme="light"
+      mode="inline"
+      defaultSelectedKeys={[`s${endYear}`]}
+      items={menuItems}
+      openKeys={openKeys}
+      onOpenChange={handleOpenChange}
+    />
+  );
 };
 
 export default MenuBolao;
