@@ -7,6 +7,8 @@ const path = require("path");
 const Aposta = require("./models/Aposta.model");
 const Tabela = require("./models/Tabela.model");
 
+app.use(express.json());
+
 // routes
 app.get("/api/", (req, res) => {
 	res.send("hello world");
@@ -35,10 +37,9 @@ app.post("/api/sendAposta", (req, res) => {
 		.catch((err) => console.log(err));
 });
 
-
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
-	
+
 	// Serve React app for all unmatched routes
 	app.use((req, res) => {
 		// if no routes match, send them the React HTML
