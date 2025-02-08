@@ -32,3 +32,5 @@ dist-ssr
 /screenshots
 /scripts
 seeds*
+python/venv
+python/*.csv
