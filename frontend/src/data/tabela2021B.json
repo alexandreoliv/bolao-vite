@@ -1,0 +1,29 @@
+{
+	"ano": 2021,
+	"serie": "B",
+	"equipes": [
+		"Avaí",
+		"Botafogo",
+		"Brasil de Pelotas",
+		"Brusque",
+		"Confiança",
+		"Coritiba",
+		"CRB",
+		"Cruzeiro",
+		"CSA",
+		"Goiás",
+		"Guarani",
+		"Londrina",
+		"Náutico",
+		"Operário Ferroviário",
+		"Ponte Preta",
+		"Remo",
+		"Sampaio Corrêa",
+		"Vasco da Gama",
+		"Vila Nova",
+		"Vitória"
+	],
+	"posicoes": [
+		4, 1, 20, 13, 19, 3, 7, 14, 5, 2, 6, 16, 8, 12, 11, 17, 15, 10, 9, 18
+	]
+}

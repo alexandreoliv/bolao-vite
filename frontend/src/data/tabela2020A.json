@@ -1,0 +1,29 @@
+{
+	"ano": 2020,
+	"serie": "A",
+	"equipes": [
+		"Athletico-PR",
+		"Atlético-GO",
+		"Atlético-MG",
+		"Bahia",
+		"Botafogo",
+		"Bragantino",
+		"Ceará",
+		"Corinthians",
+		"Coritiba",
+		"Flamengo",
+		"Fluminense",
+		"Fortaleza",
+		"Goiás",
+		"Grêmio",
+		"Internacional",
+		"Palmeiras",
+		"Santos",
+		"São Paulo",
+		"Sport",
+		"Vasco da Gama"
+	],
+	"posicoes": [
+		9, 13, 3, 14, 20, 10, 11, 12, 19, 1, 5, 16, 18, 6, 2, 7, 8, 4, 15, 17
+	]
+}

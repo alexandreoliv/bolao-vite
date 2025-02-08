@@ -1,0 +1,27 @@
+{
+	"ano": 2023,
+	"serie": "A",
+	"equipes": [
+		"América-MG",
+		"Athletico-PR",
+		"Atlético-MG",
+		"Bahia",
+		"Botafogo",
+		"Bragantino",
+		"Corinthians",
+		"Coritiba",
+		"Cruzeiro",
+		"Cuiabá",
+		"Flamengo",
+		"Fluminense",
+		"Fortaleza",
+		"Goiás",
+		"Grêmio",
+		"Internacional",
+		"Palmeiras",
+		"Santos",
+		"São Paulo",
+		"Vasco"
+	],
+	"posicoes": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+}

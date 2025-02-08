@@ -1,0 +1,29 @@
+{
+	"ano": 2021,
+	"serie": "A",
+	"equipes": [
+		"América-MG",
+		"Athletico-PR",
+		"Atlético-GO",
+		"Atlético-MG",
+		"Bahia",
+		"Bragantino",
+		"Ceará",
+		"Chapecoense",
+		"Corinthians",
+		"Cuiabá",
+		"Flamengo",
+		"Fluminense",
+		"Fortaleza",
+		"Grêmio",
+		"Internacional",
+		"Juventude",
+		"Palmeiras",
+		"Santos",
+		"São Paulo",
+		"Sport"
+	],
+	"posicoes": [
+		8, 14, 9, 1, 18, 6, 11, 20, 5, 15, 2, 7, 4, 17, 12, 16, 3, 10, 13, 19
+	]
+}
