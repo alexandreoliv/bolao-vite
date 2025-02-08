@@ -15,11 +15,15 @@ import { getRanking } from "./modules/getRanking";
 const { Content, Footer, Sider } = Layout;
 
 export const App = () => {
+	const startYear = 2020;
+	const endYear = 2024;
+
 	const [component, setComponent] = useState({
-		ano: 2022,
+		ano: endYear,
 		serie: "A",
 		page: "classificacao",
 	});
+
 	const [dados, setDados] = useState("");
 
 	useEffect(() => {
@@ -30,13 +34,19 @@ export const App = () => {
 
 	const getAllData = async () => {
 		let dados = [];
-		dados.push(await getData(2020, "A"));
-		dados.push(await getData(2021, "A"));
-		dados.push(await getData(2021, "B"));
-		dados.push(await getData(2022, "A"));
-		dados.push(await getData(2022, "B"));
-		// dados.push(await getData(2023, "A"));
-		// dados.push(await getData(2023, "B"));
+
+		// Fetch data dynamically for each year between startYear and endYear
+		for (let ano = startYear; ano <= endYear; ano++) {
+			if (ano === 2020) {
+				// Only fetch Série A for 2020
+				dados.push(await getData(ano, "A"));
+			} else {
+				// Fetch both Série A and Série B for other years
+				dados.push(await getData(ano, "A"));
+				dados.push(await getData(ano, "B"));
+			}
+		}
+
 		setDados(dados);
 	};
 
