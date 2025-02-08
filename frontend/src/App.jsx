@@ -25,7 +25,7 @@ export const App = () => {
 		if (!dados) {
 			getAllData();
 		}
-	});
+	}, [dados]);
 
 	const getAllData = async () => {
 		let dados = [];
@@ -37,6 +37,12 @@ export const App = () => {
 		// dados.push(await getData(2023, "A"));
 		// dados.push(await getData(2023, "B"));
 		setDados(dados);
+	};
+
+	const filterData = (ano, serie, key) => {
+		return dados
+			.filter((d) => d.ano === ano && d.serie === serie)
+			.map((d) => d[key])[0];
 	};
 
 	const { rankingData, rankingColumns } = dados ? getRanking(dados) : {};
@@ -67,84 +73,28 @@ export const App = () => {
 							<Apostas
 								ano={component.ano}
 								serie={component.serie}
-								apostasColumns={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.apostasColumns)[0]
-								}
-								apostasData={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.apostasData)[0]
-								}
+								apostasColumns={filterData(component.ano, component.serie, "apostasColumns")}
+								apostasData={filterData(component.ano, component.serie, "apostasData")}
 							/>
 						) : component.page === "classificacao" ? (
 							<Classificacao
 								ano={component.ano}
 								serie={component.serie}
-								classificacaoColumns={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.classificacaoColumns)[0]
-								}
-								classificacaoData={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.classificacaoData)[0]
-								}
+								classificacaoColumns={filterData(component.ano, component.serie, "classificacaoColumns")}
+								classificacaoData={filterData(component.ano, component.serie, "classificacaoData")}
 							/>
 						) : component.page === "distancia" ? (
 							<Distancia
 								ano={component.ano}
 								serie={component.serie}
-								distanciaColumns={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.distanciaColumns)[0]
-								}
-								distanciaData={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.distanciaData)[0]
-								}
+								distanciaColumns={filterData(component.ano, component.serie, "distanciaColumns")}
+								distanciaData={filterData(component.ano, component.serie, "distanciaData")}
 							/>
 						) : component.page === "addAposta" ? (
 							<AddAposta
 								ano={component.ano}
 								serie={component.serie}
-								equipes={
-									dados
-										.filter(
-											(d) =>
-												d.ano === component.ano &&
-												d.serie === component.serie
-										)
-										.map((d) => d.tabela.equipes)[0]
-								}
+								equipes={filterData(component.ano, component.serie, "tabela.equipes")}
 							/>
 						) : component.page === "ranking" ? (
 							<Ranking
