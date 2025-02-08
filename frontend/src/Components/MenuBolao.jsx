@@ -65,7 +65,7 @@ const generateMenuItems = (startYear, endYear, setComponent) => {
 const MenuBolao = ({ setComponent, startYear = 2020, endYear = 2025 }) => {
   const menuItems = generateMenuItems(startYear, endYear, setComponent);
 
-  return <Menu theme="dark" mode="horizontal" defaultSelectedKeys={[`s${endYear}`]} items={menuItems} />;
+  return <Menu theme="light" mode="inline" defaultSelectedKeys={[`s${endYear}`]} items={menuItems} />;
 };
 
 export default MenuBolao;
