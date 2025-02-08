@@ -12,7 +12,7 @@ import Ranking from "./Components/Ranking";
 import { getData } from "./modules/getData";
 import { getRanking } from "./modules/getRanking";
 
-const { Content, Footer, Sider } = Layout;
+const { Content, Sider } = Layout;
 
 export const App = () => {
 	const startYear = 2020;
@@ -146,7 +146,6 @@ export const App = () => {
 						) : null}
 					</div>
 				</Content>
-				<Footer style={{ textAlign: "center" }}></Footer>
 			</Layout>
 		</Layout>
 	);

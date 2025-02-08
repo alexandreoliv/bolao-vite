@@ -61,7 +61,7 @@ const Regras = () => {
 			<h2
 				style={{
 					fontWeight: "bold",
-					margin: "0 0 10px 10px",
+					margin: "0 0 10px 0",
 					textAlign: "center",
 				}}
 			>
@@ -73,7 +73,6 @@ const Regras = () => {
 				dataSource={data}
 				pagination={false}
 				size={"small"}
-				bordered
 			/>
 		</div>
 	);

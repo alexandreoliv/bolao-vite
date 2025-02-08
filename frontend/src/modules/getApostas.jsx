@@ -40,6 +40,7 @@ const getColumns = (apostas) => {
 		dataIndex: "Equipe",
 		align: "center",
 		width: "10%",
+		// render: (text) => <span style={{ fontWeight: "bold" }}>{text}</span>,
 	});
 	return columns;
 };
