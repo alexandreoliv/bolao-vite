@@ -52,14 +52,10 @@ const getDistanciaColumns = (keys) => {
 		key: k,
 		dataIndex: k,
 		width: index === 0 ? "10%" : "",
-		render: (text, record) => ({
-			props: {
-				style: {
-					background:
-						k !== "Atual" ? colours[Math.abs(text)] : "white",
-				},
+		onCell: (record) => ({
+			style: {
+				background: k !== "Atual" ? colours[Math.abs(record[k])] : "white",
 			},
-			children: <div>{text}</div>,
 		}),
 		align: "center",
 	}));
