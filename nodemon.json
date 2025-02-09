@@ -1,0 +1,4 @@
+{
+	"watch": ["api/server.js", "app.js"],
+	"ignore": ["python/**/*"]
+}

@@ -16,7 +16,7 @@ const { Content, Sider } = Layout;
 
 export const App = () => {
 	const startYear = 2020;
-	const endYear = 2024;
+	const endYear = 2025;
 
 	const [component, setComponent] = useState({
 		ano: endYear,
@@ -64,10 +64,14 @@ export const App = () => {
 				width={250}
 				theme="light"
 				className="site-layout-background"
-				breakpoint="md"  // Automatically collapses on smaller screens
+				breakpoint="md" // Automatically collapses on smaller screens
 				collapsedWidth="0"
 			>
-				<MenuBolao setComponent={setComponent} />
+				<MenuBolao
+					setComponent={setComponent}
+					startYear={startYear}
+					endYear={endYear}
+				/>
 			</Sider>
 			<Layout>
 				<Content style={{ padding: "0 50px" }}>

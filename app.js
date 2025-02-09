@@ -2,6 +2,7 @@ require("dotenv/config");
 require("./db");
 const express = require("express");
 const app = express();
+const { exec } = require("child_process");
 require("./config")(app);
 const path = require("path");
 const Aposta = require("./models/Aposta.model");
@@ -28,6 +29,29 @@ app.get("/api/getTabelas", (req, res) => {
 	Tabela.find({ ano: ano, serie: serie })
 		.then((tabelas) => res.json({ tabelas }))
 		.catch((err) => console.log(err));
+});
+
+app.get("/api/runPythonScript", (req, res) => {
+	const pythonPath = path.join(__dirname, "python", "venv", "bin", "python3");
+	const scriptPath = path.join(__dirname, "python", "main.py");
+
+	console.log("About to run Python script...");
+	exec(`${pythonPath} ${scriptPath}`, (error, stdout, stderr) => {
+		console.log("Python script executed.");
+		if (error) {
+			console.error(`Error: ${error.message}`);
+			return res.status(500).json({ error: error.message });
+		}
+		if (stderr) {
+			console.error(`stderr: ${stderr}`);
+			return res.status(500).json({ error: stderr });
+		}
+		console.log(`stdout: ${stdout}`);
+		res.json({
+			message: "Python script executed successfully",
+			output: stdout,
+		});
+	});
 });
 
 app.post("/api/sendAposta", (req, res) => {

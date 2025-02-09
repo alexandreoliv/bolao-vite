@@ -5,6 +5,15 @@ import pandas as pd
 import re
 import json
 from io import StringIO
+from pymongo import MongoClient
+from dotenv import load_dotenv
+
+# MongoDB Connection
+load_dotenv()  # Load environment variables from .env file
+MONGO_URI = os.getenv("MONGODB_URI")
+client = MongoClient(MONGO_URI)
+db = client["bolao"]
+collection = db["tabelas"]
 
 # Unify team names based on their previous names for consistency across years
 team_rename = {
@@ -19,9 +28,7 @@ team_rename = {
 
 def clean_team_name(name):
     # Remove "(C)" from the team name if it exists
-    name = name.replace(" (C)", "")
-    # Ensure proper encoding for accents, if necessary
-    return name
+    return name.replace(" (C)", "")
 
 # Create the /data directory if it doesn't exist
 os.makedirs('data', exist_ok=True)
@@ -47,21 +54,17 @@ def scrape_classificacao_table(url):
         return None
 
     # Convert the table to a Pandas DataFrame
-    table_html = str(table)  # Convert the table to a string
-    df = pd.read_html(StringIO(table_html))[0]  # Wrap it in StringIO
+    table_html = str(table)
+    df = pd.read_html(StringIO(table_html))[0]
 
     return df
 
 # List of URLs to scrape
 urls = [
-    "https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2024_-_S%C3%A9rie_A",
-    "https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2024_-_S%C3%A9rie_B"
+    "https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2025_-_S%C3%A9rie_A",
+    "https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2025_-_S%C3%A9rie_B"
 ]
 
-# General list to store all classification data
-general_classificacao = []
-
-# Loop through each URL and scrape the classification table
 for url in urls:
     print(f"Scraping {url}...")
     
@@ -77,7 +80,6 @@ for url in urls:
     df = scrape_classificacao_table(url)
     
     if df is not None:
-        # Store the classificacao in the general array
         classificacao = [
             {"equipe": row["Equipevde"], "pos": row["Pos"]} for index, row in df.iterrows()
         ]
@@ -87,25 +89,32 @@ for url in urls:
             equipe = item["equipe"]
             if equipe in team_rename:
                 item["equipe"] = team_rename[equipe]
-            # Clean team name (remove "(C)" and fix accents)
             item["equipe"] = clean_team_name(item["equipe"])
         
         # Sort the teams alphabetically and get positions
         equipes_sorted = sorted([item["equipe"] for item in classificacao])
         posicoes_sorted = [item["pos"] for item in sorted(classificacao, key=lambda x: x["equipe"])]
 
-        # Prepare the structure for JSON
-        general_classificacao.append({
+        tabela_data = {
             "ano": ano,
             "serie": serie,
             "equipes": equipes_sorted,
             "posicoes": posicoes_sorted
-        })
-        
+        }
+
         # Save the classification data to a JSON file
         file_name = f"data/tabela{ano}{serie.upper()}.json"
         with open(file_name, "w", encoding='utf-8') as json_file:
-            json.dump(general_classificacao[-1], json_file, ensure_ascii=False, indent=4)
-        
+            json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
+
+        # Insert into MongoDB (update if exists)
+        collection.update_one(
+            {"ano": ano, "serie": serie},
+            {"$set": tabela_data},
+            upsert=True
+        )
+
+        print(f"Saved data for {ano} {serie} in JSON and MongoDB.")
+
     else:
         print(f"Could not find the classification table for {url}.")
