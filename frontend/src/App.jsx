@@ -58,6 +58,13 @@ export const App = () => {
 
 	const { rankingData, rankingColumns } = dados ? getRanking(dados) : {};
 
+	// Extract the equipes array to be passed on to AddAposta
+	const { tabela: { equipes } = {} } = Array.isArray(dados)
+		? dados.find(
+				(d) => d.ano === component.ano && d.serie === component.serie
+		  ) || {}
+		: {};
+
 	return (
 		<Layout className="layout">
 			<Sider
@@ -139,11 +146,7 @@ export const App = () => {
 								<AddAposta
 									ano={component.ano}
 									serie={component.serie}
-									equipes={filterData(
-										component.ano,
-										component.serie,
-										"tabela.equipes"
-									)}
+									equipes={equipes}
 								/>
 							) : component.page === "ranking" ? (
 								<Ranking

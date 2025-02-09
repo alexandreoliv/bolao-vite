@@ -2,65 +2,94 @@ import { Menu } from "antd";
 import { useState } from "react";
 
 const generateMenuItems = (startYear, endYear, setComponent) => {
-  const menuItems = [];
-  const opcoes = [
-    { label: "Classificação", page: "classificacao" },
-    { label: "Apostas", page: "apostas" },
-    { label: "Distância", page: "distancia" },
-  ];
-  let keyCounter = 1;
+	const menuItems = [];
+	const opcoes = [
+		{ label: "Classificação", page: "classificacao" },
+		{ label: "Apostas", page: "apostas" },
+		{ label: "Distância", page: "distancia" },
+	];
+	let keyCounter = 1;
 
-  for (let year = endYear; year >= startYear; year--) {
-    const yearMenu = {
-      key: `s${year}`,
-      label: `${year}`,
-      children: [],
-    };
+	for (let year = endYear; year >= startYear; year--) {
+		const yearMenu = {
+			key: `s${year}`,
+			label: `${year}`,
+			children: [],
+		};
 
-    // Generate Série A menu items
-    const seriesA = opcoes.map((item) => ({
-      key: `s${year}-A-${keyCounter++}`,
-      label: item.label,
-      onClick: () => setComponent({ ano: year, serie: "A", page: item.page }),
-    }));
+		// Generate Série A menu items
+		const seriesA = opcoes.map((item) => ({
+			key: `s${year}-A-${keyCounter++}`,
+			label: item.label,
+			onClick: () =>
+				setComponent({ ano: year, serie: "A", page: item.page }),
+		}));
 
-    yearMenu.children.push({
-      type: "group",
-      label: "Série A",
-      children: seriesA,
-    });
+		yearMenu.children.push({
+			type: "group",
+			label: "Série A",
+			children: seriesA,
+		});
 
-    // Generate Série B menu items (skip for 2020)
-    if (year !== 2020) {
-      const seriesB = opcoes.map((item) => ({
-        key: `s${year}-B-${keyCounter++}`,
-        label: item.label,
-        onClick: () => setComponent({ ano: year, serie: "B", page: item.page }),
-      }));
+		// Generate Série B menu items (skip for 2020)
+		if (year !== 2020) {
+			const seriesB = opcoes.map((item) => ({
+				key: `s${year}-B-${keyCounter++}`,
+				label: item.label,
+				onClick: () =>
+					setComponent({ ano: year, serie: "B", page: item.page }),
+			}));
 
-      yearMenu.children.push({
-        type: "group",
-        label: "Série B",
-        children: seriesB,
-      });
-    }
+			yearMenu.children.push({
+				type: "group",
+				label: "Série B",
+				children: seriesB,
+			});
+		}
 
-    menuItems.push(yearMenu);
-  }
+		menuItems.push(yearMenu);
+	}
 
-  // menuItems.push({
-  //   key: `s-ranking`,
-  //   label: "Ranking",
-  //   onClick: () => setComponent((prev) => ({ ...prev, page: "ranking" })),
-  // });
+	// menuItems.push({
+	//   key: `s-ranking`,
+	//   label: "Ranking",
+	//   onClick: () => setComponent((prev) => ({ ...prev, page: "ranking" })),
+	// });
 
-  menuItems.push({
-    key: `s-regras`,
-    label: "Regras",
-    onClick: () => setComponent((prev) => ({ ...prev, page: "regras" })),
-  });
+	menuItems.push({
+		key: "s-adicionar-aposta",
+		label: "Adicionar Aposta 2025",
+		children: [
+			{
+				key: "s-adicionar-aposta-A",
+				label: "Série A",
+				onClick: () =>
+					setComponent({
+						ano: endYear,
+						serie: "A",
+						page: "addAposta",
+					}),
+			},
+			{
+				key: "s-adicionar-aposta-B",
+				label: "Série B",
+				onClick: () =>
+					setComponent({
+						ano: endYear,
+						serie: "B",
+						page: "addAposta",
+					}),
+			},
+		],
+	});
 
-  return menuItems;
+	menuItems.push({
+		key: `s-regras`,
+		label: "Regras",
+		onClick: () => setComponent((prev) => ({ ...prev, page: "regras" })),
+	});
+
+	return menuItems;
 };
 
 const MenuBolao = ({ setComponent, startYear, endYear }) => {
