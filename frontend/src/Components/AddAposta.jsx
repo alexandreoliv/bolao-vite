@@ -130,7 +130,7 @@ const AddAposta = (props) => {
 							allowClear
 						>
 							{numeros.map((p) => (
-								<Option value={p} key={p}>
+								<Option value={p} key={`posicao-${p}`}>
 									{p}
 								</Option>
 							))}
