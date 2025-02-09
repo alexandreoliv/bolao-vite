@@ -39,7 +39,7 @@ app.get("/api/runPythonScript", (req, res) => {
 	}
 
 	const pythonPath = path.join(__dirname, "python", "venv", "bin", "python3");
-	const scriptPath = path.join(__dirname, "python", "main.py");
+	const scriptPath = path.join(__dirname, "python", "scrape.py");
 
 	console.log("About to run Python script...");
 	exec(
