@@ -32,26 +32,35 @@ app.get("/api/getTabelas", (req, res) => {
 });
 
 app.get("/api/runPythonScript", (req, res) => {
+	const { ano, serie } = req.query;
+
+	if (!ano || !serie) {
+		return res.status(400).json({ error: "Ano and serie are required" });
+	}
+
 	const pythonPath = path.join(__dirname, "python", "venv", "bin", "python3");
 	const scriptPath = path.join(__dirname, "python", "main.py");
 
 	console.log("About to run Python script...");
-	exec(`${pythonPath} ${scriptPath}`, (error, stdout, stderr) => {
-		console.log("Python script executed.");
-		if (error) {
-			console.error(`Error: ${error.message}`);
-			return res.status(500).json({ error: error.message });
+	exec(
+		`${pythonPath} ${scriptPath} ${ano} ${serie}`,
+		(error, stdout, stderr) => {
+			console.log("Python script executed.");
+			if (error) {
+				console.error(`Error: ${error.message}`);
+				return res.status(500).json({ error: error.message });
+			}
+			if (stderr) {
+				console.error(`stderr: ${stderr}`);
+				return res.status(500).json({ error: stderr });
+			}
+			console.log(`stdout: ${stdout}`);
+			res.json({
+				message: "Python script executed successfully",
+				output: stdout,
+			});
 		}
-		if (stderr) {
-			console.error(`stderr: ${stderr}`);
-			return res.status(500).json({ error: stderr });
-		}
-		console.log(`stdout: ${stdout}`);
-		res.json({
-			message: "Python script executed successfully",
-			output: stdout,
-		});
-	});
+	);
 });
 
 app.post("/api/sendAposta", (req, res) => {

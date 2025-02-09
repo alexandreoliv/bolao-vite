@@ -3,8 +3,10 @@ import axios from "axios";
 export const getTabela = async (ano, serie) => {
 	if (ano === 2025) {
 		try {
-			const response = await axios.get(
-				`${import.meta.env.VITE_API_URL}/runPythonScript`
+			await axios.get(
+				`${
+					import.meta.env.VITE_API_URL
+				}/runPythonScript?ano=${ano}&serie=${serie}`
 			);
 		} catch (error) {
 			console.error("Error running Python script:", error);

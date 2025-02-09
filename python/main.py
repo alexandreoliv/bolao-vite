@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -59,62 +60,55 @@ def scrape_classificacao_table(url):
 
     return df
 
-# List of URLs to scrape
-urls = [
-    "https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2025_-_S%C3%A9rie_A",
-    "https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_2025_-_S%C3%A9rie_B"
-]
+# Get ano and serie from command-line arguments
+if len(sys.argv) < 3:
+    print("Please provide ano and serie as arguments.")
+    sys.exit(1)
 
-for url in urls:
-    print(f"Scraping {url}...")
+ano = int(sys.argv[1])
+serie = sys.argv[2]
+
+# Generate URL based on ano and serie
+url = f"https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_{ano}_-_S%C3%A9rie_{serie.upper()}"
+print(f"Scraping {url}...")
+
+df = scrape_classificacao_table(url)
+
+if df is not None:
+    classificacao = [
+        {"equipe": row["Equipevde"], "pos": row["Pos"]} for index, row in df.iterrows()
+    ]
     
-    # Extract the year (ano) and series (serie) from the URL
-    match = re.search(r"de_(\d{4})_-_S%C3%A9rie_(\w)", url)
-    if not match:
-        print(f"Could not extract ano and serie from {url}.")
-        continue
+    # Apply renaming and clean team names
+    for item in classificacao:
+        equipe = item["equipe"]
+        if equipe in team_rename:
+            item["equipe"] = team_rename[equipe]
+        item["equipe"] = clean_team_name(item["equipe"])
     
-    ano = int(match.group(1))
-    serie = match.group(2)
+    # Sort the teams alphabetically and get positions
+    equipes_sorted = sorted([item["equipe"] for item in classificacao])
+    posicoes_sorted = [item["pos"] for item in sorted(classificacao, key=lambda x: x["equipe"])]
 
-    df = scrape_classificacao_table(url)
-    
-    if df is not None:
-        classificacao = [
-            {"equipe": row["Equipevde"], "pos": row["Pos"]} for index, row in df.iterrows()
-        ]
-        
-        # Apply renaming and clean team names
-        for item in classificacao:
-            equipe = item["equipe"]
-            if equipe in team_rename:
-                item["equipe"] = team_rename[equipe]
-            item["equipe"] = clean_team_name(item["equipe"])
-        
-        # Sort the teams alphabetically and get positions
-        equipes_sorted = sorted([item["equipe"] for item in classificacao])
-        posicoes_sorted = [item["pos"] for item in sorted(classificacao, key=lambda x: x["equipe"])]
+    tabela_data = {
+        "ano": ano,
+        "serie": serie,
+        "equipes": equipes_sorted,
+        "posicoes": posicoes_sorted
+    }
 
-        tabela_data = {
-            "ano": ano,
-            "serie": serie,
-            "equipes": equipes_sorted,
-            "posicoes": posicoes_sorted
-        }
+    # Save the classification data to a JSON file
+    file_name = f"data/tabela{ano}{serie.upper()}.json"
+    with open(file_name, "w", encoding='utf-8') as json_file:
+        json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
 
-        # Save the classification data to a JSON file
-        file_name = f"data/tabela{ano}{serie.upper()}.json"
-        with open(file_name, "w", encoding='utf-8') as json_file:
-            json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
+    # Insert into MongoDB (update if exists)
+    collection.update_one(
+        {"ano": ano, "serie": serie},
+        {"$set": tabela_data},
+        upsert=True
+    )
 
-        # Insert into MongoDB (update if exists)
-        collection.update_one(
-            {"ano": ano, "serie": serie},
-            {"$set": tabela_data},
-            upsert=True
-        )
-
-        print(f"Saved data for {ano} {serie} in JSON and MongoDB.")
-
-    else:
-        print(f"Could not find the classification table for {url}.")
+    print(f"Saved data for {ano} {serie} in JSON and MongoDB.")
+else:
+    print(f"Could not find the classification table for {url}.")
