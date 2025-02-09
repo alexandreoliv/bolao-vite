@@ -32,7 +32,7 @@ def clean_team_name(name):
     return name.replace(" (C)", "")
 
 # Create the /data directory if it doesn't exist
-os.makedirs('data', exist_ok=True)
+os.makedirs('python/data', exist_ok=True)
 
 def scrape_classificacao_table(url):
     response = requests.get(url)
@@ -98,7 +98,7 @@ if df is not None:
     }
 
     # Save the classification data to a JSON file
-    file_name = f"data/tabela{ano}{serie.upper()}.json"
+    file_name = f"python/data/tabela{ano}{serie.upper()}.json"
     with open(file_name, "w", encoding='utf-8') as json_file:
         json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
 
