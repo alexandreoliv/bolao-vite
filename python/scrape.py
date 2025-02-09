@@ -8,6 +8,7 @@ import json
 from io import StringIO
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from datetime import datetime, timezone, timedelta
 
 # MongoDB Connection
 load_dotenv()  # Load environment variables from .env file
@@ -70,9 +71,27 @@ serie = sys.argv[2]
 
 # Generate URL based on ano and serie
 url = f"https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_{ano}_-_S%C3%A9rie_{serie.upper()}"
-print(f"Scraping {url}...")
+
+# Check if the data already exists and if the document is less than 5 minutes old
+existing_record = collection.find_one({"ano": ano, "serie": serie})
+
+if existing_record:
+    object_id_timestamp = existing_record["_id"].generation_time  # Get the timestamp from _id
+    print(f"Existing record timestamp: {object_id_timestamp}")
+    current_time = datetime.now(timezone.utc)
+    print(f"Current time: {current_time}")
+    time_diff = current_time - object_id_timestamp
+    print(f"Time difference: {time_diff}")
+    
+    if time_diff < timedelta(minutes=5):
+        print(f"Data for {ano} {serie} is already recent (less than 5 minutes old). Skipping update.")
+        sys.exit(0)  # Exit if the data is recent, skip scraping
+    else:
+        print(f"Data for {ano} {serie} is older than 5 minutes. Deleting the record...")
+        collection.delete_one({"ano": ano, "serie": serie})
 
 df = scrape_classificacao_table(url)
+print(f"Scraping {url}...")
 
 if df is not None:
     classificacao = [
@@ -102,12 +121,8 @@ if df is not None:
     with open(file_name, "w", encoding='utf-8') as json_file:
         json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
 
-    # Insert into MongoDB (update if exists)
-    collection.update_one(
-        {"ano": ano, "serie": serie},
-        {"$set": tabela_data},
-        upsert=True
-    )
+    # Insert the new record into MongoDB
+    collection.insert_one(tabela_data)
 
     print(f"Saved data for {ano} {serie} in JSON and MongoDB.")
 else:
