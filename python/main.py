@@ -1,8 +1,30 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import json
 from io import StringIO
+
+# Unify team names based on their previous names for consistency across years
+team_rename = {
+    "Atlético Mineiro": "Atlético-MG",
+    "Red Bull Bragantino": "Bragantino",
+    "Vasco da Gama": "Vasco",
+    "América Mineiro": "América-MG",
+    "Athletic": "Athletic-MG",
+    "Athletico Paranaense": "Athletico-PR",
+    "Atlético Goianiense": "Atlético-GO"
+}
+
+def clean_team_name(name):
+    # Remove "(C)" from the team name if it exists
+    name = name.replace(" (C)", "")
+    # Ensure proper encoding for accents, if necessary
+    return name
+
+# Create the /data directory if it doesn't exist
+os.makedirs('data', exist_ok=True)
 
 def scrape_classificacao_table(url):
     response = requests.get(url)
@@ -60,25 +82,30 @@ for url in urls:
             {"equipe": row["Equipevde"], "pos": row["Pos"]} for index, row in df.iterrows()
         ]
         
-        # Add this classification to the general list
+        # Apply renaming and clean team names
+        for item in classificacao:
+            equipe = item["equipe"]
+            if equipe in team_rename:
+                item["equipe"] = team_rename[equipe]
+            # Clean team name (remove "(C)" and fix accents)
+            item["equipe"] = clean_team_name(item["equipe"])
+        
+        # Sort the teams alphabetically and get positions
+        equipes_sorted = sorted([item["equipe"] for item in classificacao])
+        posicoes_sorted = [item["pos"] for item in sorted(classificacao, key=lambda x: x["equipe"])]
+
+        # Prepare the structure for JSON
         general_classificacao.append({
             "ano": ano,
             "serie": serie,
-            "classificacao": classificacao
+            "equipes": equipes_sorted,
+            "posicoes": posicoes_sorted
         })
         
-        # Save the DataFrame to a CSV file
-        file_name = url.split("/")[-1].replace("_", "-") + "_classificacao.csv"
-        df.to_csv(file_name, index=False)
+        # Save the classification data to a JSON file
+        file_name = f"data/tabela{ano}{serie.upper()}.json"
+        with open(file_name, "w", encoding='utf-8') as json_file:
+            json.dump(general_classificacao[-1], json_file, ensure_ascii=False, indent=4)
+        
     else:
         print(f"Could not find the classification table for {url}.")
-
-# Print the general classificacao array
-# print("General Classificação:", general_classificacao)
-
-# Loop through the general_classificacao list and print each object individually
-for item in general_classificacao:
-    print("Ano:", item["ano"])
-    print("Série:", item["serie"])
-    print("Classificação:", item["classificacao"])
-    print()  # Adding a blank line between each classification
