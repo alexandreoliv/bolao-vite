@@ -92,13 +92,12 @@ const AddAposta = (props) => {
 					textAlign: "center",
 				}}
 			>
-				Adicionar Aposta
+				Adicionar Aposta {serie} {ano}
 			</h2>
-
 			<Form
 				name="basic"
-				labelCol={{ span: 2 }}
-				wrapperCol={{ span: 3 }}
+				labelCol={{ span: 6 }}
+				wrapperCol={{ span: 6 }}
 				initialValues={{ remember: true }}
 				onFinish={onFinish}
 				onFinishFailed={onFinishFailed}
@@ -114,7 +113,7 @@ const AddAposta = (props) => {
 						},
 					]}
 				>
-					<Input />
+					<Input maxLength={15} />
 				</Form.Item>
 
 				{equipes.map((e) => (

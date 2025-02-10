@@ -50,6 +50,23 @@ table td {
 	line-height: 1.3;
 }
 
+h2 {
+	margin-left: 0 !important;
+}
+
+/* AddAposta */
+.ant-form {
+	padding-top: 8px;
+}
+
+.ant-row {
+	gap: 16px;
+}
+
+.ant-form-item-row {
+	width: 50vw;
+}
+
 /* Mobile layout (small screens) */
 @media (max-width: 768px) {
 	.site-layout .ant-layout-sider {
