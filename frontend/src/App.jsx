@@ -61,7 +61,10 @@ export const App = () => {
 		let rankingBData = [];
 		let rankingABData = [];
 
-		dados.forEach((d) => {
+		// Filter out data from the current year (endYear)
+		const filteredData = dados.filter((d) => d.ano !== endYear);
+
+		filteredData.forEach((d) => {
 			if (d.serie === "A") {
 				rankingAData = rankingAData.concat(d.classificacaoData);
 			} else if (d.serie === "B") {
