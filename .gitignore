@@ -34,3 +34,4 @@ dist-ssr
 seeds*
 python/venv
 python/*.csv
+scrapeB*

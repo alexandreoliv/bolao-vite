@@ -38,35 +38,45 @@ app.get("/api/scrapeTabela", (req, res) => {
 		return res.status(400).json({ error: "Ano and serie are required" });
 	}
 
-	const pythonPath = path.join(__dirname, "python", "venv", "bin", "python3");
-	const scriptPath = path.join(__dirname, "python", "scrape.py");
+	console.log("About to run scraping script...");
 
-	console.log("About to run Python script...");
-	exec(
-		`${pythonPath} ${scriptPath} ${ano} ${serie}`,
-		(error, stdout, stderr) => {
-			console.log("Python script executed.");
-			if (error) {
-				console.error(
-					`Error executing Python script: ${error.message}`
-				);
-				return res
-					.status(500)
-					.json({ error: "Failed to execute script" });
-			}
-			if (stderr) {
-				console.error(`Python script stderr: ${stderr}`);
-				return res
-					.status(500)
-					.json({ error: "Script execution error" });
-			}
-			console.log(`Python script stdout: ${stdout}`);
-			res.status(200).json({
-				message: "Python script executed successfully",
-				output: stdout,
-			});
+	// Detect if we are on Vercel or locally
+	const isVercel = process.env.VERCEL === "1"; // Vercel sets this environment variable
+
+	const scriptPath = isVercel
+		? path.join(__dirname, "frontend", "src", "modules", "scrape.js") // On Vercel, use the Node.js script
+		: path.join(__dirname, "python", "scrape.py"); // Locally, use the Python script
+
+	const command = isVercel
+		? `node ${scriptPath} ${ano} ${serie}` // Node.js command
+		: `${path.join(
+				__dirname,
+				"python",
+				"venv",
+				"bin",
+				"python3"
+		  )} ${scriptPath} ${ano} ${serie}`; // Python command
+
+	exec(command, (error, stdout, stderr) => {
+		console.log("Scraping script executed.");
+		if (error) {
+			console.error(`Error executing script: ${error.message}`);
+			return res
+				.status(500)
+				.json({ error: `Failed to execute script: ${error.message}` });
 		}
-	);
+		if (stderr) {
+			console.error(`Script stderr: ${stderr}`);
+			return res
+				.status(500)
+				.json({ error: `Script execution error: ${stderr}` });
+		}
+		console.log(`Script stdout: ${stdout}`);
+		res.status(200).json({
+			message: "Scraping script executed successfully",
+			output: stdout,
+		});
+	});
 });
 
 app.post("/api/sendAposta", (req, res) => {
