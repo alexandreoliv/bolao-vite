@@ -56,7 +56,30 @@ export const App = () => {
 			.map((d) => d[key])[0];
 	};
 
-	const { rankingData, rankingColumns } = dados ? getRanking(dados) : {};
+	const calculateRankings = (dados) => {
+		let rankingAData = [];
+		let rankingBData = [];
+		let rankingABData = [];
+
+		dados.forEach((d) => {
+			if (d.serie === "A") {
+				rankingAData = rankingAData.concat(d.classificacaoData);
+			} else if (d.serie === "B") {
+				rankingBData = rankingBData.concat(d.classificacaoData);
+			}
+			rankingABData = rankingABData.concat(d.classificacaoData);
+		});
+
+		const rankingA = getRanking(rankingAData);
+		const rankingB = getRanking(rankingBData);
+		const rankingAB = getRanking(rankingABData);
+
+		return { rankingA, rankingB, rankingAB };
+	};
+
+	const { rankingA, rankingB, rankingAB } = dados
+		? calculateRankings(dados)
+		: {};
 
 	// Extract the equipes array to be passed on to AddAposta
 	const { tabela: { equipes } = {} } = Array.isArray(dados)
@@ -64,6 +87,21 @@ export const App = () => {
 				(d) => d.ano === component.ano && d.serie === component.serie
 		  ) || {}
 		: {};
+
+	const getRankingData = (serie) => {
+		switch (serie) {
+			case "A":
+				return rankingA || { rankingColumns: [], rankingData: [] };
+			case "B":
+				return rankingB || { rankingColumns: [], rankingData: [] };
+			case "Geral":
+				return rankingAB || { rankingColumns: [], rankingData: [] };
+			default:
+				return { rankingColumns: [], rankingData: [] };
+		}
+	};
+
+	const { rankingColumns, rankingData } = getRankingData(component.serie);
 
 	return (
 		<Layout className="layout">
@@ -150,6 +188,7 @@ export const App = () => {
 								/>
 							) : component.page === "ranking" ? (
 								<Ranking
+									serie={component.serie}
 									rankingColumns={rankingColumns}
 									rankingData={rankingData}
 								/>

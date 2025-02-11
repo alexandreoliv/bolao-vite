@@ -1,437 +1,116 @@
-const currentYear = 2023;
+const removeNames = new Set([
+	"18ª Rodada",
+	"19ª Rodada",
+	"Chance de Gol",
+	"ESPN/Fox",
+	"FiveThirtyEight",
+	"GE/SporTV",
+	"Globo Esporte",
+	"O Lance",
+	"PVC",
+	"Random",
+	"Ranking CBF",
+	"Ranking Pontos Corridos",
+	"Super",
+	"Transfermarkt",
+]);
 
-export const getRanking = (dados) => {
-	const apostadores = getApostadores(dados);
-	const historico = getHistorico(dados);
-	const ranking = getFinalRanking(apostadores, historico);
-	const rankingData = getRankingData(ranking);
-	const rankingColumns = getRankingColumns(ranking);
-	return { rankingData, rankingColumns };
-};
+export const getRanking = (classificacaoData) => {
+	const finalRanking = {};
+	let previousPosition = Infinity; // start with a large number to detect the first year
 
-const getApostadores = (dados) => {
-	let allNames = [];
-	for (let i = 0; i < dados.length; i++) {
-		if (dados[i].ano !== currentYear) {
-			const newNames = dados[i].classificacaoData.map((b) => b.nome);
-			allNames = [...allNames, ...newNames];
+	classificacaoData.forEach((entry) => {
+		const { nome, pontuacao, posicao } = entry;
+
+		if (removeNames.has(nome)) return;
+
+		if (!finalRanking[nome]) {
+			finalRanking[nome] = {
+				totalPoints: 0,
+				participations: 0,
+				titles: 0,
+			};
 		}
-	}
 
-	return Array.from([...new Set(allNames)]).sort();
-};
+		finalRanking[nome].totalPoints += pontuacao;
+		finalRanking[nome].participations += 1;
 
-const getHistorico = (dados) => {
-	let historico = [];
-	let newDados = dados
-		.filter((d) => d.ano !== currentYear)
-		.map((d) => d.classificacaoData);
-	for (let i = 0; i < newDados.length; i++) {
-		historico = [
-			...historico,
-			...newDados[i].map((b) => ({
-				nome: b.nome,
-				serie: dados[i].serie,
-				pontuacao: b.pontuacao,
-				posicao: b.posicao,
-				posicaoProporcional: (b.posicao / newDados.length) * 10,
-			})),
-		];
-	}
-	return historico;
-};
+		// check if a new year has started
+		if (posicao < previousPosition) {
+			// assign title to the current entry
+			finalRanking[nome].titles += 1;
+		}
 
-const getFinalRanking = (apoiadores, historico) => {
-	const apoiadoresData = apoiadores.map((a) => ({
-		nome: a,
-		titulosA: null,
-		titulosB: null,
-		titulosTotal: null,
-		campeonatosA: null,
-		campeonatosB: null,
-		campeonatosTotal: null,
-		pontuacaoA: null,
-		pontuacaoB: null,
-		pontuacaoTotal: null,
-		mediaPontuacaoA: null,
-		mediaPontuacaoB: null,
-		mediaPontuacaoTotal: null,
-		posicaoA: null,
-		posicaoB: null,
-		posicaoTotal: null,
-		mediaPosicaoA: null,
-		mediaPosicaoB: null,
-		mediaPosicaoTotal: null,
-		posicaoProporcionalA: null,
-		posicaoProporcionalB: null,
-		posicaoProporcionalTotal: null,
-		mediaPosicaoProporcionalA: null,
-		mediaPosicaoProporcionalB: null,
-		mediaPosicaoProporcionalTotal: null,
-	}));
+		previousPosition = posicao;
+	});
 
-	let historicoApostador = [];
-	for (let i = 0; i < apoiadores.length; i++) {
-		historicoApostador.push(
-			historico.filter((h) => h.nome === apoiadores[i])
-		);
-	}
-
-	for (let i = 0; i < apoiadoresData.length; i++) {
-		apoiadoresData[i].titulosA = historicoApostador[i].filter(
-			(h) => h.posicao === 1 && h.serie === "A"
-		).length;
-
-		apoiadoresData[i].titulosB = historicoApostador[i].filter(
-			(h) => h.posicao === 1 && h.serie === "B"
-		).length;
-
-		apoiadoresData[i].titulosTotal =
-			apoiadoresData[i].titulosA + apoiadoresData[i].titulosB;
-
-		apoiadoresData[i].campeonatosA = historicoApostador[i].filter(
-			(h) => h.serie === "A"
-		).length;
-
-		apoiadoresData[i].campeonatosB = historicoApostador[i].filter(
-			(h) => h.serie === "B"
-		).length;
-
-		apoiadoresData[i].campeonatosTotal =
-			apoiadoresData[i].campeonatosA + apoiadoresData[i].campeonatosB;
-
-		apoiadoresData[i].pontuacaoA = historicoApostador[i]
-			.filter((h) => h.serie === "A")
-			.map((h) => h.pontuacao)
-			.reduce((accumulator, item) => accumulator + item, 0);
-
-		apoiadoresData[i].pontuacaoB = historicoApostador[i]
-			.filter((h) => h.serie === "B")
-			.map((h) => h.pontuacao)
-			.reduce((accumulator, item) => accumulator + item, 0);
-
-		apoiadoresData[i].pontuacaoTotal =
-			apoiadoresData[i].pontuacaoA + apoiadoresData[i].pontuacaoB;
-
-		if (apoiadoresData[i].campeonatosA) {
-			apoiadoresData[i].mediaPontuacaoA = (
-				apoiadoresData[i].pontuacaoA / apoiadoresData[i].campeonatosA
-			).toFixed(0);
-		} else apoiadoresData[i].mediaPontuacaoA = "";
-
-		if (apoiadoresData[i].campeonatosB) {
-			apoiadoresData[i].mediaPontuacaoB = (
-				apoiadoresData[i].pontuacaoB / apoiadoresData[i].campeonatosB
-			).toFixed(0);
-		} else apoiadoresData[i].mediaPontuacaoB = "";
-
-		apoiadoresData[i].mediaPontuacaoTotal = (
-			apoiadoresData[i].pontuacaoTotal /
-			apoiadoresData[i].campeonatosTotal
-		).toFixed(0);
-
-		apoiadoresData[i].posicaoA = historicoApostador[i]
-			.filter((h) => h.serie === "A")
-			.map((h) => h.posicao)
-			.reduce((accumulator, item) => accumulator + item, 0);
-
-		apoiadoresData[i].posicaoB = historicoApostador[i]
-			.filter((h) => h.serie === "B")
-			.map((h) => h.posicao)
-			.reduce((accumulator, item) => accumulator + item, 0);
-
-		apoiadoresData[i].posicaoTotal =
-			apoiadoresData[i].posicaoA + apoiadoresData[i].posicaoB;
-
-		if (apoiadoresData[i].campeonatosA) {
-			apoiadoresData[i].mediaPosicaoA = (
-				apoiadoresData[i].posicaoA / apoiadoresData[i].campeonatosA
-			).toFixed(0);
-		} else apoiadoresData[i].mediaPosicaoA = "";
-
-		if (apoiadoresData[i].campeonatosB) {
-			apoiadoresData[i].mediaPosicaoB = (
-				apoiadoresData[i].posicaoB / apoiadoresData[i].campeonatosB
-			).toFixed(0);
-		} else apoiadoresData[i].mediaPosicaoB = "";
-
-		apoiadoresData[i].mediaPosicaoTotal = (
-			apoiadoresData[i].posicaoTotal / apoiadoresData[i].campeonatosTotal
-		).toFixed(0);
-
-		apoiadoresData[i].posicaoProporcionalA = historicoApostador[i]
-			.filter((h) => h.serie === "A")
-			.map((h) => h.posicaoProporcional)
-			.reduce((accumulator, item) => accumulator + item, 0);
-
-		apoiadoresData[i].posicaoProporcionalB = historicoApostador[i]
-			.filter((h) => h.serie === "B")
-			.map((h) => h.posicaoProporcional)
-			.reduce((accumulator, item) => accumulator + item, 0);
-
-		apoiadoresData[i].posicaoProporcionalTotal =
-			apoiadoresData[i].posicaoProporcionalA +
-			apoiadoresData[i].posicaoProporcionalB;
-
-		if (apoiadoresData[i].campeonatosA) {
-			apoiadoresData[i].mediaPosicaoProporcionalA = (
-				apoiadoresData[i].posicaoProporcionalA /
-				apoiadoresData[i].campeonatosA
-			).toFixed(0);
-		} else apoiadoresData[i].mediaPosicaoProporcionalA = "";
-
-		if (apoiadoresData[i].campeonatosB) {
-			apoiadoresData[i].mediaPosicaoProporcionalB = (
-				apoiadoresData[i].posicaoProporcionalB /
-				apoiadoresData[i].campeonatosB
-			).toFixed(0);
-		} else apoiadoresData[i].mediaPosicaoProporcionalB = "";
-
-		apoiadoresData[i].mediaPosicaoProporcionalTotal = (
-			apoiadoresData[i].posicaoProporcionalTotal /
-			apoiadoresData[i].campeonatosTotal
-		).toFixed(0);
-	}
-	return apoiadoresData;
-};
-
-const getRankingData = (ranking) => {
-	return ranking;
-};
-
-const getRankingColumns = () => {
-	return [
+	const rankingColumns = [
 		{
-			title: "Nome",
-			ellipsis: true,
-			key: "nome",
-			dataIndex: "nome",
+			title: "Posição",
+			key: "position",
+			dataIndex: "position",
 			align: "center",
-			width: "10%",
-			defaultSortOrder: "ascend",
-			sorter: (a, b) => (a.nome < b.nome ? -1 : 1),
+		},
+		{ title: "Nome", key: "name", dataIndex: "name", align: "center" },
+		{
+			title: "Títulos",
+			key: "titles",
+			dataIndex: "titles",
+			align: "center",
 		},
 		{
-			title: "TA",
-			ellipsis: true,
-			key: "titulosA",
-			dataIndex: "titulosA",
+			title: "Média de Pontos",
+			key: "average",
+			dataIndex: "average",
 			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.titulosA - b.titulosA,
 		},
 		{
-			title: "TB",
-			ellipsis: true,
-			key: "titulosB",
-			dataIndex: "titulosB",
+			title: "Participações",
+			key: "participations",
+			dataIndex: "participations",
 			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.titulosB - b.titulosB,
 		},
 		{
-			title: "TT",
-			ellipsis: true,
-			key: "titulosTotal",
-			dataIndex: "titulosTotal",
+			title: "Pontuação Total",
+			key: "totalPoints",
+			dataIndex: "totalPoints",
 			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.titulosTotal - b.titulosTotal,
-		},
-		{
-			title: "CA",
-			ellipsis: true,
-			key: "campeonatosA",
-			dataIndex: "campeonatosA",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.campeonatosA - b.campeonatosA,
-		},
-		{
-			title: "CB",
-			ellipsis: true,
-			key: "campeonatosB",
-			dataIndex: "campeonatosB",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.campeonatosB - b.campeonatosB,
-		},
-		{
-			title: "CT",
-			ellipsis: true,
-			key: "campeonatosTotal",
-			dataIndex: "campeonatosTotal",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.campeonatosTotal - b.campeonatosTotal,
-		},
-		// {
-		// 	title: "Pontuação A",
-		// 	ellipsis: true,
-		// 	key: "pontuacaoA",
-		// 	dataIndex: "pontuacaoA",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.pontuacaoA - b.pontuacaoA,
-		// },
-		// {
-		// 	title: "Pontuação B",
-		// 	ellipsis: true,
-		// 	key: "pontuacaoB",
-		// 	dataIndex: "pontuacaoB",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.pontuacaoB - b.pontuacaoB,
-		// },
-		// {
-		// 	title: "Pontuação Total",
-		// 	ellipsis: true,
-		// 	key: "pontuacaoTotal",
-		// 	dataIndex: "pontuacaoTotal",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.pontuacaoTotal - b.pontuacaoTotal,
-		// },
-		{
-			title: "MPonA",
-			ellipsis: true,
-			key: "mediaPontuacaoA",
-			dataIndex: "mediaPontuacaoA",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.mediaPontuacaoA - b.mediaPontuacaoA,
-		},
-		{
-			title: "MPonB",
-			ellipsis: true,
-			key: "mediaPontuacaoB",
-			dataIndex: "mediaPontuacaoB",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.mediaPontuacaoB - b.mediaPontuacaoB,
-		},
-		{
-			title: "MPonT",
-			ellipsis: true,
-			key: "mediaPontuacaoTotal",
-			dataIndex: "mediaPontuacaoTotal",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.mediaPontuacaoTotal - b.mediaPontuacaoTotal,
-		},
-		// {
-		// 	title: "Posição A",
-		// 	ellipsis: true,
-		// 	key: "posicaoA",
-		// 	dataIndex: "posicaoA",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.posicaoA - b.posicaoA,
-		// },
-		// {
-		// 	title: "Posição B",
-		// 	ellipsis: true,
-		// 	key: "posicaoB",
-		// 	dataIndex: "posicaoB",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.posicaoB - b.posicaoB,
-		// },
-		// {
-		// 	title: "Posição Total",
-		// 	ellipsis: true,
-		// 	key: "posicaoTotal",
-		// 	dataIndex: "posicaoTotal",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.posicaoTotal - b.posicaoTotal,
-		// },
-		{
-			title: "MPosA",
-			ellipsis: true,
-			key: "mediaPosicaoA",
-			dataIndex: "mediaPosicaoA",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.mediaPosicaoA - b.mediaPosicaoA,
-		},
-		{
-			title: "MPosB",
-			ellipsis: true,
-			key: "mediaPosicaoB",
-			dataIndex: "mediaPosicaoB",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.mediaPosicaoB - b.mediaPosicaoB,
-		},
-		{
-			title: "MPosT",
-			ellipsis: true,
-			key: "mediaPosicaoTotal",
-			dataIndex: "mediaPosicaoTotal",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) => a.mediaPosicaoTotal - b.mediaPosicaoTotal,
-		},
-		// {
-		// 	title: "Posição Proporcional A",
-		// 	ellipsis: true,
-		// 	key: "posicaoProporcionalA",
-		// 	dataIndex: "posicaoProporcionalA",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.posicaoProporcionalA - b.posicaoProporcionalA,
-		// },
-		// {
-		// 	title: "Posição Proporcional B",
-		// 	ellipsis: true,
-		// 	key: "posicaoProporcionalB",
-		// 	dataIndex: "posicaoProporcionalB",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) => a.posicaoProporcionalB - b.posicaoProporcionalB,
-		// },
-		// {
-		// 	title: "Posição Proporcional Total",
-		// 	ellipsis: true,
-		// 	key: "posicaoProporcionalTotal",
-		// 	dataIndex: "posicaoProporcionalTotal",
-		// 	align: "center",
-		// 	defaultSortOrder: "descend",
-		// 	sorter: (a, b) =>
-		// 		a.posicaoProporcionalTotal - b.posicaoProporcionalTotal,
-		// },
-		{
-			title: "MPosPropA",
-			tooltip: "Média Posição Proporcional A",
-			ellipsis: true,
-			key: "mediaPosicaoProporcionalA",
-			dataIndex: "mediaPosicaoProporcionalA",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) =>
-				a.mediaPosicaoProporcionalA - b.mediaPosicaoProporcionalA,
-		},
-		{
-			title: "MPosPropB",
-			ellipsis: true,
-			key: "mediaPosicaoProporcionalB",
-			dataIndex: "mediaPosicaoProporcionalB",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) =>
-				a.mediaPosicaoProporcionalB - b.mediaPosicaoProporcionalB,
-		},
-		{
-			title: "MPosPropT",
-			ellipsis: true,
-			key: "mediaPosicaoProporcionalTotal",
-			dataIndex: "mediaPosicaoProporcionalTotal",
-			align: "center",
-			defaultSortOrder: "descend",
-			sorter: (a, b) =>
-				a.mediaPosicaoProporcionalTotal -
-				b.mediaPosicaoProporcionalTotal,
 		},
 	];
+
+	const rankingData = Object.entries(finalRanking)
+		.map(([name, data], index) => ({
+			key: index,
+			name,
+			totalPoints: data.totalPoints,
+			participations: data.participations,
+			average: (data.totalPoints / data.participations).toFixed(2),
+			titles: data.titles,
+		}))
+		.sort((a, b) => {
+			if (b.titles !== a.titles) return b.titles - a.titles;
+			if (b.average !== a.average) return b.average - a.average;
+			if (b.participations !== a.participations)
+				return b.participations - a.participations;
+			return a.name.localeCompare(b.name);
+		})
+		.map((entry, index, array) => {
+			if (
+				index > 0 &&
+				entry.titles === array[index - 1].titles &&
+				entry.average === array[index - 1].average &&
+				entry.participations === array[index - 1].participations
+			) {
+				entry.position = array[index - 1].position;
+			} else {
+				entry.position = index + 1;
+			}
+			return entry;
+		})
+		.sort((a, b) => {
+			if (a.position !== b.position) return a.position - b.position;
+			return a.name.localeCompare(b.name);
+		});
+
+	return { rankingColumns, rankingData };
 };

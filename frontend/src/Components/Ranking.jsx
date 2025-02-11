@@ -1,7 +1,7 @@
 import { Table } from "antd";
 
 const Ranking = (props) => {
-	const { rankingColumns, rankingData } = props;
+	const { serie, rankingColumns, rankingData } = props;
 
 	if (!props.rankingColumns) return null; // no props yet
 
@@ -14,7 +14,9 @@ const Ranking = (props) => {
 					textAlign: "center",
 				}}
 			>
-				Ranking
+				{serie === "Geral"
+					? `Ranking ${serie}`
+					: `Ranking Série ${serie}`}
 			</h2>
 			<Table
 				className="big-table"

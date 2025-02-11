@@ -50,11 +50,28 @@ const generateMenuItems = (startYear, endYear, setComponent) => {
 		menuItems.push(yearMenu);
 	}
 
-	// menuItems.push({
-	//   key: `s-ranking`,
-	//   label: "Ranking",
-	//   onClick: () => setComponent((prev) => ({ ...prev, page: "ranking" })),
-	// });
+	menuItems.push({
+		key: `s-ranking`,
+		label: "Rankings",
+		children: [
+			{
+				key: "s-ranking-A",
+				label: "Série A",
+				onClick: () => setComponent({ page: "ranking", serie: "A" }),
+			},
+			{
+				key: "s-ranking-B",
+				label: "Série B",
+				onClick: () => setComponent({ page: "ranking", serie: "B" }),
+			},
+			{
+				key: "s-ranking-geral",
+				label: "Geral",
+				onClick: () =>
+					setComponent({ page: "ranking", serie: "Geral" }),
+			},
+		],
+	});
 
 	menuItems.push({
 		key: "s-adicionar-aposta",
