@@ -5,66 +5,116 @@ const { Option } = Select;
 
 const AddAposta = (props) => {
 	const { ano, serie, equipes } = props;
-	const [formData, setFormData] = useState({}); // Stores form data per série
-	const [posicoes, setPosicoes] = useState([]);
-	const [numeros, setNumeros] = useState([
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-	]);
-	const [disabled, setDisabled] = useState(false);
+	const [form] = Form.useForm();
+	const [formData, setFormData] = useState({});
+	const [disabled, setDisabled] = useState(true);
 
 	useEffect(() => {
 		if (!equipes) return;
 
-		// If there is stored data for this série, use it
-		if (formData[serie]) {
-			setPosicoes(formData[serie].posicoes);
-			setNumeros(formData[serie].numeros);
-		} else {
-			const state = equipes.map((e) => ({
-				equipe: e,
-				posicao: 0,
+		// initialize form data for the current série if it doesn't exist
+		if (!formData[serie]) {
+			const initialState = {
+				nome: "",
+				posicoes: equipes.map((e) => ({ equipe: e, posicao: 0 })),
+				numerosDisponiveis: Array.from({ length: 20 }, (_, i) => i + 1),
+				sent: false,
+			};
+			setFormData((prev) => ({
+				...prev,
+				[serie]: initialState,
 			}));
-			setPosicoes(state);
-			setNumeros([
-				1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-				19, 20,
-			]);
 		}
-	}, [equipes, serie]);
+
+		// set form fields based on the current série's data
+		const currentData = formData[serie] || {
+			nome: "",
+			posicoes: equipes.map((e) => ({ equipe: e, posicao: 0 })),
+			numerosDisponiveis: Array.from({ length: 20 }, (_, i) => i + 1),
+			sent: false,
+		};
+		form.setFieldsValue({
+			nome: currentData.nome,
+			...currentData.posicoes.reduce((acc, { equipe, posicao }) => {
+				acc[equipe] = posicao;
+				return acc;
+			}, {}),
+		});
+
+		checkFormCompletion();
+	}, [serie, equipes, form, formData]);
 
 	const onPosicaoChange = (equipe, posicao) => {
+		const currentData = formData[serie] || {
+			nome: "",
+			posicoes: equipes.map((e) => ({ equipe: e, posicao: 0 })),
+			numerosDisponiveis: Array.from({ length: 20 }, (_, i) => i + 1),
+		};
+
+		// prevents posicao from being undefined in case the user deletes it
+		const newPosicao = posicao === undefined ? 0 : posicao;
+
 		// gets previous position of this team
-		const previousPosition = posicoes
+		const previousPosition = currentData.posicoes
 			.filter((p) => p.equipe === equipe)
 			.map((p) => p.posicao)[0];
 
 		// removes the new position from the array of available positions
-		const numerosNew = numeros.filter((n) => n !== posicao);
+		const numerosNew = currentData.numerosDisponiveis.filter(
+			(n) => n !== newPosicao
+		);
 		// and adds back the previous position (if it's not 0) -> then sorts it
 		if (previousPosition !== 0) {
 			numerosNew.push(previousPosition);
 			numerosNew.sort((a, b) => a - b);
 		}
-		setNumeros(numerosNew);
 
 		// now updates Posicoes
-		const posicoesNew = posicoes.map((p) =>
-			p.equipe === equipe ? { equipe, posicao } : p
+		const posicoesNew = currentData.posicoes.map((p) =>
+			p.equipe === equipe ? { equipe, posicao: newPosicao } : p
 		);
-		setPosicoes(posicoesNew);
 
-		// Save form data per `serie`
+		// update form data for the current série
 		setFormData((prev) => ({
 			...prev,
-			[serie]: { posicoes: posicoesNew, numeros: numerosNew },
+			[serie]: {
+				...prev[serie],
+				posicoes: posicoesNew,
+				numerosDisponiveis: numerosNew,
+			},
 		}));
+
+		// update form field
+		form.setFieldsValue({ [equipe]: newPosicao });
+	};
+
+	const onNomeChange = (e) => {
+		const newNome = e.target.value;
+
+		// save form data per `série`
+		setFormData((prev) => ({
+			...prev,
+			[serie]: {
+				...prev[serie],
+				nome: newNome,
+			},
+		}));
+		form.setFieldsValue({ nome: newNome });
 	};
 
 	const onFinish = async (values) => {
-		setDisabled(true);
 		const nome = values["nome"];
 		const aposta = equipes.map((e) => values[e]);
 		const obj = { ano, serie, nome, aposta };
+
+		// update sent status for the current série
+		setFormData((prev) => ({
+			...prev,
+			[serie]: {
+				...prev[serie],
+				sent: true,
+			},
+		}));
 
 		return axios
 			.post(`${import.meta.env.VITE_API_URL}/sendAposta`, obj)
@@ -76,6 +126,13 @@ const AddAposta = (props) => {
 
 	const onFinishFailed = (errorInfo) => {
 		console.log("Failed:", errorInfo);
+	};
+
+	const checkFormCompletion = () => {
+		const allValues = form.getFieldsValue();
+		const allFieldsFilled = equipes.every((e) => allValues[e]);
+		const nomeFilled = allValues["nome"] && allValues["nome"].trim() !== "";
+		setDisabled(!(allFieldsFilled && nomeFilled));
 	};
 
 	if (!equipes) {
@@ -95,13 +152,15 @@ const AddAposta = (props) => {
 				Adicionar Aposta {serie} {ano}
 			</h2>
 			<Form
-				name="basic"
+				form={form}
+				name={`form-${serie}`}
 				labelCol={{ span: 6 }}
 				wrapperCol={{ span: 6 }}
-				initialValues={{ remember: true }}
 				onFinish={onFinish}
 				onFinishFailed={onFinishFailed}
+				onValuesChange={checkFormCompletion}
 				autoComplete="off"
+				disabled={formData[serie]?.sent}
 			>
 				<Form.Item
 					label="Nome"
@@ -113,7 +172,7 @@ const AddAposta = (props) => {
 						},
 					]}
 				>
-					<Input maxLength={15} />
+					<Input maxLength={15} onChange={onNomeChange} />
 				</Form.Item>
 
 				{equipes.map((e) => (
@@ -128,8 +187,8 @@ const AddAposta = (props) => {
 							onChange={(event) => onPosicaoChange(e, event)}
 							allowClear
 						>
-							{numeros.map((p) => (
-								<Option value={p} key={`posicao-${p}`}>
+							{formData[serie]?.numerosDisponiveis.map((p) => (
+								<Option value={p} key={p}>
 									{p}
 								</Option>
 							))}
@@ -141,9 +200,9 @@ const AddAposta = (props) => {
 					<Button
 						type="primary"
 						htmlType="submit"
-						disabled={disabled}
+						disabled={disabled || formData[serie]?.sent}
 					>
-						{disabled ? "Aposta enviada" : "Enviar"}
+						{formData[serie]?.sent ? "Aposta enviada" : "Enviar"}
 					</Button>
 				</Form.Item>
 			</Form>
