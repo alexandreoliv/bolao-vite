@@ -1,12 +1,19 @@
-require("dotenv/config");
-require("./db");
-const express = require("express");
+import "dotenv/config";
+import "./db/index.js";
+import express from "express";
+import { exec } from "child_process";
+import path from "path";
+import { fileURLToPath } from "url";
+import config from "./config/index.js";
+import { Aposta } from "./models/Aposta.model.js";
+import { Tabela } from "./models/Tabela.model.js";
+
+// get __dirname equivalent in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const { exec } = require("child_process");
-require("./config")(app);
-const path = require("path");
-const Aposta = require("./models/Aposta.model");
-const Tabela = require("./models/Tabela.model");
+config(app);
 
 app.use(express.json());
 
@@ -40,12 +47,12 @@ app.get("/api/scrapeTabela", (req, res) => {
 
 	console.log("About to run scraping script...");
 
-	// Detect if we are on Vercel or locally
+	// detect if we are on Vercel or locally
 	const isVercel = process.env.VERCEL === "1"; // Vercel sets this environment variable
 
 	const scriptPath = isVercel
-		? path.join(__dirname, "frontend", "src", "modules", "scrape.js") // On Vercel, use the Node.js script
-		: path.join(__dirname, "python", "scrape.py"); // Locally, use the Python script
+		? path.join(__dirname, "frontend", "src", "modules", "scrape.js")
+		: path.join(__dirname, "python", "scrape.py");
 
 	const command = isVercel
 		? `node ${scriptPath} ${ano} ${serie}` // Node.js command
@@ -101,16 +108,16 @@ app.post("/api/sendAposta", (req, res) => {
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "/frontend/dist")));
 
-	// Serve React app for all unmatched routes
+	// serve React app for all unmatched routes
 	app.use((req, res) => {
 		// if no routes match, send them the React HTML
 		res.sendFile(path.join(__dirname, "/frontend/dist/index.html"));
 	});
 } else {
-	// Return JSON 404 error for unmatched routes in development
+	// return JSON 404 error for unmatched routes in development
 	app.use((req, res) => {
 		res.status(404).json({ error: "Route not found" });
 	});
 }
 
-module.exports = app;
+export default app;

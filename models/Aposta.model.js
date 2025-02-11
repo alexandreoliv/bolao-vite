@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
 
 const apostaSchema = new Schema({
 	ano: Number,
@@ -8,6 +9,4 @@ const apostaSchema = new Schema({
 	aposta: [Number],
 });
 
-const Aposta = mongoose.model("Aposta", apostaSchema);
-
-module.exports = Aposta;
+export const Aposta = mongoose.model("Aposta", apostaSchema);

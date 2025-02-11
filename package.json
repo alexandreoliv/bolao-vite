@@ -21,5 +21,6 @@
 		"server": "nodemon api/server.js",
 		"client": "npm run dev --prefix frontend",
 		"dev": "concurrently --kill-others \"npm run server\" \"npm run client\""
-	}
+	},
+	"type": "module"
 }

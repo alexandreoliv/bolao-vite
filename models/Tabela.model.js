@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
+
+const { Schema } = mongoose;
 
 const tabelaSchema = new Schema({
 	ano: Number,
@@ -8,6 +9,4 @@ const tabelaSchema = new Schema({
 	posicoes: [Number],
 });
 
-const Tabela = mongoose.model("Tabela", tabelaSchema);
-
-module.exports = Tabela;
+export const Tabela = mongoose.model("Tabela", tabelaSchema);

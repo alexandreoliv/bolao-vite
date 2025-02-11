@@ -1,14 +1,14 @@
-const express = require("express");
-const logger = require("morgan");
-const cors = require("cors");
+import express from "express";
+import logger from "morgan";
+import cors from "cors";
 
 // middleware configuration
-module.exports = (app) => {
+export default (app) => {
 	app.set("trust proxy", 1);
 	app.use(
 		cors({
 			credentials: true,
-			// origin: "https://bolao2023.onrender.com",
+			// origin: "https://bolao-vite.vercel.app
 			origin: "http://localhost:5173",
 		})
 	);
