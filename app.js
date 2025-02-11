@@ -31,7 +31,7 @@ app.get("/api/getTabelas", (req, res) => {
 		.catch((err) => console.log(err));
 });
 
-app.get("/api/runPythonScript", (req, res) => {
+app.get("/api/scrapeTabela", (req, res) => {
 	const { ano, serie } = req.query;
 
 	if (!ano || !serie) {

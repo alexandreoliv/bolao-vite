@@ -6,7 +6,7 @@ export const getTabela = async (ano, serie) => {
 			await axios.get(
 				`${
 					import.meta.env.VITE_API_URL
-				}/runPythonScript?ano=${ano}&serie=${serie}`
+				}/scrapeTabela?ano=${ano}&serie=${serie}`
 			);
 		} catch (error) {
 			console.error("Error running Python script:", error);
