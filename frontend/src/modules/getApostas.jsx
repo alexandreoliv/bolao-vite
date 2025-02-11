@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const getApostas = async (serie, ano, tabela) => {
 	const apostas = await getFile(serie, ano);
@@ -8,13 +8,18 @@ export const getApostas = async (serie, ano, tabela) => {
 	return { apostasColumns, apostasData, keys };
 };
 
-const getFile = (ano, serie) => {
-	return axios
-		.get(
-			`${import.meta.env.VITE_API_URL}/getApostas?ano=${ano}&serie=${serie}`
-		)
-		.then((response) => response.data.apostas)
-		.catch((error) => console.log(error));
+const getFile = async (ano, serie) => {
+	try {
+		const response = await axios.get(
+			`${
+				import.meta.env.VITE_API_URL
+			}/getApostas?ano=${ano}&serie=${serie}`
+		);
+		return response.data.apostas;
+	} catch (error) {
+		console.error("Error fetching apostas:", error);
+		return null;
+	}
 };
 
 const getColumns = (apostas) => {

@@ -6,16 +6,21 @@ import pandas as pd
 import re
 import json
 from io import StringIO
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 
 # MongoDB Connection
 load_dotenv()  # Load environment variables from .env file
 MONGO_URI = os.getenv("MONGODB_URI")
-client = MongoClient(MONGO_URI)
-db = client["bolao"]
-collection = db["tabelas"]
+
+try:
+    client = MongoClient(MONGO_URI)
+    db = client["bolao"]
+    collection = db["tabelas"]
+except errors.ConnectionError as e:
+    print(f"Error connecting to MongoDB: {e}")
+    sys.exit(1)
 
 # Unify team names based on their previous names for consistency across years
 team_rename = {
@@ -36,8 +41,12 @@ def clean_team_name(name):
 os.makedirs('python/data', exist_ok=True)
 
 def scrape_classificacao_table(url):
-    response = requests.get(url)
-    response.raise_for_status()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print(f"Error fetching URL {url}: {e}")
+        return None
     
     soup = BeautifulSoup(response.text, "html.parser")
     
@@ -73,7 +82,11 @@ serie = sys.argv[2]
 url = f"https://pt.wikipedia.org/wiki/Campeonato_Brasileiro_de_Futebol_de_{ano}_-_S%C3%A9rie_{serie.upper()}"
 
 # Check if the data already exists and if the document is less than 5 minutes old
-existing_record = collection.find_one({"ano": ano, "serie": serie})
+try:
+    existing_record = collection.find_one({"ano": ano, "serie": serie})
+except errors.PyMongoError as e:
+    print(f"Error querying MongoDB: {e}")
+    sys.exit(1)
 
 if existing_record:
     object_id_timestamp = existing_record["_id"].generation_time  # Get the timestamp from _id
@@ -87,8 +100,12 @@ if existing_record:
         print(f"Data for {ano} {serie} is already recent (less than 5 minutes old). Skipping update.")
         sys.exit(0)  # Exit if the data is recent, skip scraping
     else:
-        print(f"Data for {ano} {serie} is older than 5 minutes. Deleting the record...")
-        collection.delete_one({"ano": ano, "serie": serie})
+        try:
+            print(f"Data for {ano} {serie} is older than 5 minutes. Deleting the record...")
+            collection.delete_one({"ano": ano, "serie": serie})
+        except errors.PyMongoError as e:
+            print(f"Error deleting record from MongoDB: {e}")
+            sys.exit(1)
 
 df = scrape_classificacao_table(url)
 print(f"Scraping {url}...")
@@ -118,11 +135,19 @@ if df is not None:
 
     # Save the classification data to a JSON file
     file_name = f"python/data/tabela{ano}{serie.upper()}.json"
-    with open(file_name, "w", encoding='utf-8') as json_file:
-        json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
+    try:
+        with open(file_name, "w", encoding='utf-8') as json_file:
+            json.dump(tabela_data, json_file, ensure_ascii=False, indent=4)
+    except IOError as e:
+        print(f"Error writing to file {file_name}: {e}")
+        sys.exit(1)
 
     # Insert the new record into MongoDB
-    collection.insert_one(tabela_data)
+    try:
+        collection.insert_one(tabela_data)
+    except errors.PyMongoError as e:
+        print(f"Error inserting record into MongoDB: {e}")
+        sys.exit(1)
 
     print(f"Saved data for {ano} {serie} in JSON and MongoDB.")
 else:

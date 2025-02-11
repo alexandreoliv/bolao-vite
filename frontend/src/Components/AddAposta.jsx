@@ -116,12 +116,15 @@ const AddAposta = (props) => {
 			},
 		}));
 
-		return axios
-			.post(`${import.meta.env.VITE_API_URL}/sendAposta`, obj)
-			.then((response) => {
-				console.log({ response });
-			})
-			.catch((error) => console.log(error));
+		try {
+			const response = await axios.post(
+				`${import.meta.env.VITE_API_URL}/sendAposta`,
+				obj
+			);
+			console.log({ response });
+		} catch (error) {
+			console.error("Error sending aposta:", error);
+		}
 	};
 
 	const onFinishFailed = (errorInfo) => {

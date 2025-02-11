@@ -13,12 +13,15 @@ export const getTabela = async (ano, serie) => {
 		}
 	}
 
-	return await axios
-		.get(
+	try {
+		const response = await axios.get(
 			`${
 				import.meta.env.VITE_API_URL
 			}/getTabelas?ano=${ano}&serie=${serie}`
-		)
-		.then((response) => response.data.tabelas[0])
-		.catch((error) => console.log(error));
+		);
+		return response.data.tabelas[0];
+	} catch (error) {
+		console.error("Error fetching tabelas:", error);
+		return null;
+	}
 };

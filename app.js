@@ -47,15 +47,21 @@ app.get("/api/scrapeTabela", (req, res) => {
 		(error, stdout, stderr) => {
 			console.log("Python script executed.");
 			if (error) {
-				console.error(`Error: ${error.message}`);
-				return res.status(500).json({ error: error.message });
+				console.error(
+					`Error executing Python script: ${error.message}`
+				);
+				return res
+					.status(500)
+					.json({ error: "Failed to execute script" });
 			}
 			if (stderr) {
-				console.error(`stderr: ${stderr}`);
-				return res.status(500).json({ error: stderr });
+				console.error(`Python script stderr: ${stderr}`);
+				return res
+					.status(500)
+					.json({ error: "Script execution error" });
 			}
-			console.log(`stdout: ${stdout}`);
-			res.json({
+			console.log(`Python script stdout: ${stdout}`);
+			res.status(200).json({
 				message: "Python script executed successfully",
 				output: stdout,
 			});
@@ -66,8 +72,20 @@ app.get("/api/scrapeTabela", (req, res) => {
 app.post("/api/sendAposta", (req, res) => {
 	console.log("----->>> POST /sendAposta called: ");
 	Aposta.create(req.body)
-		.then((a) => console.log(`Successfully added aposta ${a}`))
-		.catch((err) => console.log(err));
+		.then((a) => {
+			console.log(`Successfully added aposta ${a}`);
+			res.status(200).json({
+				message: "Aposta successfully added",
+				aposta: a,
+			});
+		})
+		.catch((err) => {
+			console.error("Error adding aposta:", err);
+			res.status(500).json({
+				message: "Error adding aposta",
+				error: "Failed to add aposta",
+			});
+		});
 });
 
 if (process.env.NODE_ENV === "production") {
