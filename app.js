@@ -47,22 +47,22 @@ app.get("/api/scrapeTabela", (req, res) => {
 
 	console.log("About to run scraping script...");
 
-	// detect if we are on Vercel or locally
-	const isVercel = process.env.VERCEL === "1"; // Vercel sets this environment variable
+	// check if we should run the Python script
+	const usePython = process.env.PYTHON === "1";
 
-	const scriptPath = isVercel
-		? path.join(__dirname, "api", "scrape.js")
-		: path.join(__dirname, "python", "scrape.py");
+	const scriptPath = usePython
+		? path.join(__dirname, "python", "scrape.py")
+		: path.join(__dirname, "api", "scrape.js");
 
-	const command = isVercel
-		? `node ${scriptPath} ${ano} ${serie}` // Node.js command
-		: `${path.join(
+	const command = usePython
+		? `${path.join(
 				__dirname,
 				"python",
 				"venv",
 				"bin",
 				"python3"
-		  )} ${scriptPath} ${ano} ${serie}`; // Python command
+		  )} ${scriptPath} ${ano} ${serie}` // Python command
+		: `node ${scriptPath} ${ano} ${serie}`; // Node.js command
 
 	exec(command, (error, stdout, stderr) => {
 		console.log("Scraping script executed.");
