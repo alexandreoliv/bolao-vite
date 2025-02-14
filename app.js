@@ -51,7 +51,7 @@ app.get("/api/scrapeTabela", (req, res) => {
 	const isVercel = process.env.VERCEL === "1"; // Vercel sets this environment variable
 
 	const scriptPath = isVercel
-		? path.join(__dirname, "frontend", "src", "modules", "scrape.js")
+		? path.join(__dirname, "api", "scrape.js")
 		: path.join(__dirname, "python", "scrape.py");
 
 	const command = isVercel
