@@ -29,9 +29,7 @@ dist-ssr
 /frontend/.env.production
 /frontend/.env.development
 .env
-/screenshots
-/scripts
-seeds*
 python/venv
 python/*.csv
-scrapeB*
+python/data
+misc
