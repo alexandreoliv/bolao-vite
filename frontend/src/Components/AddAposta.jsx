@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button, Form, Input, Select } from "antd";
 import axios from "axios";
 const { Option } = Select;
@@ -8,6 +8,13 @@ const AddAposta = (props) => {
 	const [form] = Form.useForm();
 	const [formData, setFormData] = useState({});
 	const [disabled, setDisabled] = useState(true);
+
+	const checkFormCompletion = useCallback(() => {
+		const allValues = form.getFieldsValue();
+		const allFieldsFilled = equipes.every((e) => allValues[e]);
+		const nomeFilled = allValues["nome"] && allValues["nome"].trim() !== "";
+		setDisabled(!(allFieldsFilled && nomeFilled));
+	}, [form, equipes]);
 
 	useEffect(() => {
 		if (!equipes) return;
@@ -42,7 +49,7 @@ const AddAposta = (props) => {
 		});
 
 		checkFormCompletion();
-	}, [serie, equipes, form, formData]);
+	}, [serie, equipes, form, formData, checkFormCompletion]);
 
 	const onPosicaoChange = (equipe, posicao) => {
 		const currentData = formData[serie] || {
@@ -129,13 +136,6 @@ const AddAposta = (props) => {
 
 	const onFinishFailed = (errorInfo) => {
 		console.log("Failed:", errorInfo);
-	};
-
-	const checkFormCompletion = () => {
-		const allValues = form.getFieldsValue();
-		const allFieldsFilled = equipes.every((e) => allValues[e]);
-		const nomeFilled = allValues["nome"] && allValues["nome"].trim() !== "";
-		setDisabled(!(allFieldsFilled && nomeFilled));
 	};
 
 	if (!equipes) {
