@@ -21,7 +21,7 @@ export const App = () => {
 	const [component, setComponent] = useState({
 		ano: endYear,
 		serie: "A",
-		page: "classificacao",
+		page: "addAposta",
 	});
 
 	const [dados, setDados] = useState("");

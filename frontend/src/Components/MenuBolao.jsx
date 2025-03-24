@@ -3,6 +3,34 @@ import { useState } from "react";
 
 const generateMenuItems = (startYear, endYear, setComponent) => {
 	const menuItems = [];
+
+	menuItems.push({
+		key: "s-adicionar-aposta",
+		label: "Adicionar Aposta 2025",
+		children: [
+			{
+				key: "s-adicionar-aposta-A",
+				label: "Série A",
+				onClick: () =>
+					setComponent({
+						ano: 2025,
+						serie: "A",
+						page: "addAposta",
+					}),
+			},
+			{
+				key: "s-adicionar-aposta-B",
+				label: "Série B",
+				onClick: () =>
+					setComponent({
+						ano: 2025,
+						serie: "B",
+						page: "addAposta",
+					}),
+			},
+		],
+	});
+
 	const opcoes = [
 		{ label: "Classificação", page: "classificacao" },
 		{ label: "Apostas", page: "apostas" },
@@ -10,7 +38,7 @@ const generateMenuItems = (startYear, endYear, setComponent) => {
 	];
 	let keyCounter = 1;
 
-	for (let year = endYear; year >= startYear; year--) {
+	for (let year = endYear - 1; year >= startYear; year--) {
 		const yearMenu = {
 			key: `s${year}`,
 			label: `${year}`,
@@ -74,33 +102,6 @@ const generateMenuItems = (startYear, endYear, setComponent) => {
 	});
 
 	menuItems.push({
-		key: "s-adicionar-aposta",
-		label: "Adicionar Aposta 2025",
-		children: [
-			{
-				key: "s-adicionar-aposta-A",
-				label: "Série A",
-				onClick: () =>
-					setComponent({
-						ano: endYear,
-						serie: "A",
-						page: "addAposta",
-					}),
-			},
-			{
-				key: "s-adicionar-aposta-B",
-				label: "Série B",
-				onClick: () =>
-					setComponent({
-						ano: endYear,
-						serie: "B",
-						page: "addAposta",
-					}),
-			},
-		],
-	});
-
-	menuItems.push({
 		key: `s-regras`,
 		label: "Regras",
 		onClick: () => setComponent((prev) => ({ ...prev, page: "regras" })),
@@ -110,7 +111,7 @@ const generateMenuItems = (startYear, endYear, setComponent) => {
 };
 
 const MenuBolao = ({ setComponent, startYear, endYear }) => {
-	const [openKeys, setOpenKeys] = useState([`s${endYear}`]);
+	const [openKeys, setOpenKeys] = useState(["s-adicionar-aposta"]);
 
 	const handleOpenChange = (keys) => {
 		// Only keep the last clicked year key, closing the other years' submenus
@@ -123,7 +124,7 @@ const MenuBolao = ({ setComponent, startYear, endYear }) => {
 		<Menu
 			theme="light"
 			mode="inline"
-			defaultSelectedKeys={[`s${endYear}`]}
+			defaultSelectedKeys={["s-adicionar-aposta-A"]}
 			items={menuItems}
 			openKeys={openKeys}
 			onOpenChange={handleOpenChange}
